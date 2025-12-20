@@ -30,6 +30,7 @@ class LotteryRandomizer {
         this.createParticles();
         this.loadFromLocalStorage();
         this.updateStats();
+        this.displayLatestResults();
     }
 
     async loadData() {
@@ -142,15 +143,24 @@ class LotteryRandomizer {
         // Animate slots
         await this.animateSlots(result.number);
 
+        // เช็คว่าถูกรางวัลที่ 1 หรือไม่
+        const prizeWon = this.checkPrizeFirst(result.number);
+
+        if (prizeWon) {
+            // แสดงความยินดีพร้อมพลุ
+            this.showCelebration(prizeWon);
+        }
+
         // Add to history
         this.addToHistory({
             number: result.number,
             attempts: result.attempts,
-            timestamp: new Date().toLocaleString('th-TH')
+            timestamp: new Date().toLocaleString('th-TH'),
+            won: prizeWon ? true : false
         });
 
         // Show result info
-        this.showResultInfo(result);
+        this.showResultInfo(result, prizeWon);
 
         // Update stats
         this.updateStats();
@@ -216,10 +226,18 @@ class LotteryRandomizer {
         }
     }
 
-    showResultInfo(result) {
+    showResultInfo(result, prizeWon = null) {
         const resultInfo = document.getElementById('resultInfo');
         resultInfo.querySelector('.result-date').textContent = `🔄 ลองสุ่ม ${result.attempts} ครั้ง`;
-        resultInfo.querySelector('.result-prize').textContent = `✅ เลขนี้ไม่เคยออกรางวัลมาก่อน!`;
+
+        if (prizeWon) {
+            resultInfo.querySelector('.result-prize').textContent = `🎉 ถูกรางวัลที่ 1! งวด ${prizeWon.date}`;
+            resultInfo.querySelector('.result-prize').style.color = '#ffd700';
+        } else {
+            resultInfo.querySelector('.result-prize').textContent = `✅ เลขนี้ไม่เคยออกรางวัลมาก่อน!`;
+            resultInfo.querySelector('.result-prize').style.color = '';
+        }
+
         resultInfo.classList.add('show');
     }
 
@@ -340,6 +358,158 @@ class LotteryRandomizer {
 
     sleep(ms) {
         return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    /**
+     * แสดงผลหวยล่าสุดจากข้อมูล JSON
+     */
+    displayLatestResults() {
+        if (!this.data) return;
+
+        // หาวันที่ล่าสุดจากรางวัลที่ 1
+        const latestDraw = this.data.prizeFirst?.draws?.[0];
+        if (latestDraw) {
+            document.getElementById('latestDate').textContent = `📅 ${latestDraw.date}`;
+        }
+
+        // แสดงแต่ละรางวัล
+        this.renderPrizeNumbers('prizeFirst', 'prizeFirstNumbers');
+        this.renderPrizeNumbers('prizeFirstNear', 'prizeFirstNearNumbers');
+        this.renderPrizeNumbers('prizeSecond', 'prizeSecondNumbers');
+        this.renderPrizeNumbers('prizeThird', 'prizeThirdNumbers');
+        this.renderPrizeNumbers('prizeForth', 'prizeFourthNumbers');
+        this.renderPrizeNumbers('prizeFifth', 'prizeFifthNumbers');
+    }
+
+    /**
+     * แสดงเลขรางวัลในแต่ละประเภท
+     */
+    renderPrizeNumbers(prizeKey, elementId) {
+        const container = document.getElementById(elementId);
+        if (!container) return;
+
+        const prizeData = this.data[prizeKey];
+        if (!prizeData || !prizeData.draws || prizeData.draws.length === 0) {
+            container.innerHTML = '<span class="number">-</span>';
+            return;
+        }
+
+        // ดึงเลขจากงวดล่าสุด
+        const latestNumbers = prizeData.draws[0].numbers;
+
+        container.innerHTML = latestNumbers.map(num =>
+            `<span class="number">${num}</span>`
+        ).join('');
+    }
+
+    /**
+     * เช็คว่าเลขที่สุ่มได้ตรงกับรางวัลที่ 1 หรือไม่
+     */
+    checkPrizeFirst(number) {
+        if (!this.data || !this.data.prizeFirst || !this.data.prizeFirst.draws) {
+            return null;
+        }
+
+        for (const draw of this.data.prizeFirst.draws) {
+            if (draw.numbers.includes(number)) {
+                return {
+                    date: draw.date,
+                    number: number
+                };
+            }
+        }
+        return null;
+    }
+
+    /**
+     * แสดงความยินดีพร้อมเอฟเฟกต์พลุ
+     */
+    showCelebration(prizeWon) {
+        // สร้าง overlay
+        const overlay = document.createElement('div');
+        overlay.className = 'celebration-overlay';
+        overlay.innerHTML = `
+            <div class="celebration-content">
+                <div class="fireworks-container" id="fireworksContainer"></div>
+                <div class="celebration-box">
+                    <div class="celebration-icon">🎉</div>
+                    <h2 class="celebration-title">ยินดีด้วย!</h2>
+                    <p class="celebration-subtitle">เลขที่คุณสุ่มได้ตรงกับ</p>
+                    <div class="celebration-prize">รางวัลที่ 1</div>
+                    <div class="celebration-number">${prizeWon.number}</div>
+                    <div class="celebration-date">งวดวันที่ ${prizeWon.date}</div>
+                    <div class="celebration-reward">💰 6,000,000 บาท</div>
+                    <button class="celebration-close" onclick="this.closest('.celebration-overlay').remove()">
+                        ปิด
+                    </button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(overlay);
+
+        // เริ่มเอฟเฟกต์พลุ
+        this.launchFireworks();
+
+        // ปิดอัตโนมัติหลัง 10 วินาที
+        setTimeout(() => {
+            if (overlay.parentNode) {
+                overlay.remove();
+            }
+        }, 10000);
+    }
+
+    /**
+     * สร้างเอฟเฟกต์พลุ
+     */
+    launchFireworks() {
+        const container = document.getElementById('fireworksContainer');
+        if (!container) return;
+
+        const colors = ['#ffd700', '#ff6b6b', '#4ecdc4', '#45b7d1', '#ff006e', '#00ff87', '#f9ca24', '#ff9ff3'];
+
+        // สร้างพลุหลายชุด
+        for (let i = 0; i < 20; i++) {
+            setTimeout(() => {
+                this.createFirework(container, colors);
+            }, i * 200);
+        }
+    }
+
+    /**
+     * สร้างพลุหนึ่งลูก
+     */
+    createFirework(container, colors) {
+        const x = Math.random() * 100;
+        const y = Math.random() * 60 + 10;
+        const color = colors[Math.floor(Math.random() * colors.length)];
+
+        // สร้าง particles สำหรับพลุลูกนี้
+        for (let i = 0; i < 30; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'firework-particle';
+
+            const angle = (i / 30) * 360;
+            const velocity = 50 + Math.random() * 50;
+            const size = 3 + Math.random() * 5;
+
+            particle.style.cssText = `
+                position: absolute;
+                left: ${x}%;
+                top: ${y}%;
+                width: ${size}px;
+                height: ${size}px;
+                background: ${color};
+                border-radius: 50%;
+                box-shadow: 0 0 ${size * 2}px ${color}, 0 0 ${size * 4}px ${color};
+                --angle: ${angle}deg;
+                --velocity: ${velocity}px;
+                animation: fireworkExplode 1.5s ease-out forwards;
+            `;
+
+            container.appendChild(particle);
+
+            setTimeout(() => particle.remove(), 1500);
+        }
     }
 }
 

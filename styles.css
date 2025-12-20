@@ -866,3 +866,456 @@ body {
         font-size: 0.75rem;
     }
 }
+
+/* ============================================
+   Latest Results Section
+   ============================================ */
+.latest-results-section {
+    margin-bottom: 40px;
+    animation: fadeInUp 0.8s ease-out 0.25s backwards;
+}
+
+.latest-date {
+    display: inline-block;
+    padding: 5px 15px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--accent-gold);
+    background: rgba(255, 215, 0, 0.1);
+    border: 1px solid rgba(255, 215, 0, 0.3);
+    border-radius: 20px;
+    margin-left: 15px;
+}
+
+/* Prize Cards */
+.prize-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    margin-bottom: 15px;
+    overflow: hidden;
+    transition: var(--transition-medium);
+}
+
+.prize-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px var(--shadow-color);
+}
+
+.prize-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 15px 20px;
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.prize-badge {
+    font-size: 1.5rem;
+}
+
+.prize-title {
+    flex: 1;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.prize-reward {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--accent-gold);
+    padding: 4px 12px;
+    background: rgba(255, 215, 0, 0.1);
+    border-radius: 15px;
+}
+
+.prize-numbers {
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.prize-numbers .number {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 80px;
+    padding: 12px 20px;
+    font-size: 1.5rem;
+    font-weight: 700;
+    font-family: 'Courier New', monospace;
+    letter-spacing: 3px;
+    color: var(--accent-gold);
+    background: linear-gradient(180deg, #2a2a35, #1a1a25);
+    border: 2px solid rgba(255, 215, 0, 0.3);
+    border-radius: var(--radius-sm);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    transition: var(--transition-medium);
+}
+
+.prize-numbers .number:hover {
+    transform: scale(1.05);
+    border-color: var(--accent-gold);
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+}
+
+/* Prize First - Bigger and More Prominent */
+.prize-first {
+    border-color: rgba(255, 215, 0, 0.3);
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.05), rgba(255, 140, 0, 0.05));
+}
+
+.prize-first .prize-header {
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(255, 140, 0, 0.1));
+}
+
+.prize-first .prize-numbers .number {
+    font-size: 2.5rem;
+    min-width: 200px;
+    padding: 20px 40px;
+    border-color: var(--accent-gold);
+    background: linear-gradient(180deg, #3a3a45, #2a2a35);
+    box-shadow: 0 0 30px rgba(255, 215, 0, 0.2);
+}
+
+/* Prize Near */
+.prize-near {
+    border-color: rgba(0, 212, 255, 0.2);
+}
+
+.prize-near .prize-header {
+    background: linear-gradient(135deg, rgba(0, 212, 255, 0.05), rgba(67, 97, 238, 0.05));
+}
+
+.prize-near .prize-numbers .number {
+    color: var(--accent-cyan);
+    border-color: rgba(0, 212, 255, 0.3);
+}
+
+/* Grid Numbers for multiple prizes */
+.grid-numbers {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 10px;
+}
+
+.grid-numbers .number {
+    font-size: 1.1rem;
+    min-width: auto;
+    padding: 10px 15px;
+}
+
+/* Prize Second */
+.prize-second .prize-numbers .number {
+    color: #c0c0c0;
+    border-color: rgba(192, 192, 192, 0.3);
+}
+
+/* Prize Third */
+.prize-third .prize-numbers .number {
+    color: #cd7f32;
+    border-color: rgba(205, 127, 50, 0.3);
+}
+
+/* Prize Fourth and Fifth */
+.prize-fourth .prize-numbers .number,
+.prize-fifth .prize-numbers .number {
+    color: var(--accent-purple);
+    border-color: rgba(157, 78, 221, 0.3);
+}
+
+/* Loading state */
+.prize-numbers.loading {
+    min-height: 80px;
+}
+
+.prize-numbers.loading .number {
+    animation: pulse 1.5s ease-in-out infinite;
+    background: var(--bg-secondary);
+    color: transparent;
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        opacity: 0.5;
+    }
+
+    50% {
+        opacity: 1;
+    }
+}
+
+/* Responsive for Latest Results */
+@media (max-width: 768px) {
+    .prize-header {
+        flex-wrap: wrap;
+        gap: 8px;
+        padding: 12px 15px;
+    }
+
+    .prize-badge {
+        font-size: 1.2rem;
+    }
+
+    .prize-title {
+        font-size: 0.9rem;
+    }
+
+    .prize-reward {
+        font-size: 0.75rem;
+        padding: 3px 10px;
+    }
+
+    .prize-first .prize-numbers .number {
+        font-size: 1.8rem;
+        min-width: 160px;
+        padding: 15px 25px;
+    }
+
+    .grid-numbers {
+        grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    }
+
+    .grid-numbers .number {
+        font-size: 0.95rem;
+        padding: 8px 12px;
+    }
+
+    .latest-date {
+        display: block;
+        margin: 10px 0 0 0;
+        text-align: center;
+    }
+}
+
+/* ============================================
+   Celebration Overlay & Fireworks
+   ============================================ */
+.celebration-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.9);
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+.celebration-content {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.fireworks-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.celebration-box {
+    position: relative;
+    z-index: 1;
+    background: linear-gradient(135deg, #1a1a25, #2a2a35);
+    border: 3px solid var(--accent-gold);
+    border-radius: 24px;
+    padding: 50px 60px;
+    text-align: center;
+    box-shadow:
+        0 0 60px rgba(255, 215, 0, 0.4),
+        0 0 120px rgba(255, 215, 0, 0.2),
+        inset 0 0 60px rgba(255, 215, 0, 0.05);
+    animation: celebrationPop 0.5s ease-out;
+}
+
+@keyframes celebrationPop {
+    0% {
+        transform: scale(0.5);
+        opacity: 0;
+    }
+
+    50% {
+        transform: scale(1.1);
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.celebration-icon {
+    font-size: 5rem;
+    animation: bounce 1s ease-in-out infinite;
+    margin-bottom: 10px;
+}
+
+.celebration-title {
+    font-size: 2.5rem;
+    font-weight: 800;
+    background: var(--gradient-gold);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 10px;
+    text-shadow: 0 0 30px rgba(255, 215, 0, 0.5);
+}
+
+.celebration-subtitle {
+    font-size: 1.1rem;
+    color: var(--text-secondary);
+    margin-bottom: 15px;
+}
+
+.celebration-prize {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--accent-gold);
+    margin-bottom: 20px;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+}
+
+.celebration-number {
+    font-size: 4rem;
+    font-weight: 800;
+    font-family: 'Courier New', monospace;
+    letter-spacing: 10px;
+    color: #fff;
+    background: linear-gradient(180deg, #ffd700, #ff8c00);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    padding: 15px 30px;
+    border: 3px solid rgba(255, 215, 0, 0.5);
+    border-radius: 15px;
+    margin: 20px 0;
+    display: inline-block;
+    animation: glow 1.5s ease-in-out infinite alternate;
+}
+
+@keyframes glow {
+    from {
+        box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+    }
+
+    to {
+        box-shadow: 0 0 40px rgba(255, 215, 0, 0.6), 0 0 80px rgba(255, 215, 0, 0.3);
+    }
+}
+
+.celebration-date {
+    font-size: 1rem;
+    color: var(--text-secondary);
+    margin-bottom: 15px;
+}
+
+.celebration-reward {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--accent-green);
+    margin-bottom: 30px;
+    animation: pulse 1s ease-in-out infinite;
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.05);
+    }
+}
+
+.celebration-close {
+    padding: 15px 50px;
+    font-family: var(--font-main);
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #000;
+    background: var(--gradient-gold);
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: var(--transition-medium);
+}
+
+.celebration-close:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 30px rgba(255, 215, 0, 0.5);
+}
+
+/* Firework Particles */
+@keyframes fireworkExplode {
+    0% {
+        transform: translate(-50%, -50%) rotate(var(--angle)) translateX(0) scale(1);
+        opacity: 1;
+    }
+
+    100% {
+        transform: translate(-50%, -50%) rotate(var(--angle)) translateX(var(--velocity)) scale(0);
+        opacity: 0;
+    }
+}
+
+/* Responsive Celebration */
+@media (max-width: 768px) {
+    .celebration-box {
+        padding: 30px 25px;
+        margin: 20px;
+        border-radius: 16px;
+    }
+
+    .celebration-icon {
+        font-size: 3.5rem;
+    }
+
+    .celebration-title {
+        font-size: 1.8rem;
+    }
+
+    .celebration-number {
+        font-size: 2.5rem;
+        letter-spacing: 5px;
+        padding: 10px 20px;
+    }
+
+    .celebration-reward {
+        font-size: 1.5rem;
+    }
+
+    .celebration-close {
+        padding: 12px 40px;
+        font-size: 1rem;
+    }
+}
