@@ -166,8 +166,9 @@ function organizeByPrizeType(allData) {
             generatedAt: new Date().toISOString(),
             totalDraws: allData.length,
             dateRange: {
-                from: allData.length > 0 ? allData[0].date : null,
-                to: allData.length > 0 ? allData[allData.length - 1].date : null
+                // from = งวดเก่าสุด (index สุดท้าย), to = งวดใหม่สุด (index แรก)
+                from: allData.length > 0 ? allData[allData.length - 1].date : null,
+                to: allData.length > 0 ? allData[0].date : null
             }
         },
         prizeFirst: { name: 'รางวัลที่ 1', reward: '6000000', draws: [] },

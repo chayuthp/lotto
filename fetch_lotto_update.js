@@ -173,8 +173,9 @@ function addNewDraw(existingData, newDraw) {
     existingData.metadata.totalDraws = existingData.prizeFirst.draws.length;
 
     if (existingData.prizeFirst.draws.length > 0) {
-        existingData.metadata.dateRange.from = existingData.prizeFirst.draws[0].date;
-        existingData.metadata.dateRange.to = existingData.prizeFirst.draws[existingData.prizeFirst.draws.length - 1].date;
+        // from = งวดเก่าสุด (index สุดท้าย), to = งวดใหม่สุด (index แรก)
+        existingData.metadata.dateRange.from = existingData.prizeFirst.draws[existingData.prizeFirst.draws.length - 1].date;
+        existingData.metadata.dateRange.to = existingData.prizeFirst.draws[0].date;
     }
 
     return existingData;

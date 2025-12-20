@@ -83,26 +83,169 @@ class LotteryRandomizer {
     }
 
     /**
-     * สุ่มเลขที่ไม่เคยออกรางวัลมาก่อน
-     * ถ้าซ้ำจะสุ่มใหม่จนกว่าจะได้เลขที่ไม่ซ้ำ
+     * เช็คว่าเป็นเลขน้อยเกินไป (000000 - 100000)
+     */
+    isLowNumber(number) {
+        const num = parseInt(number, 10);
+        return num <= 100000;
+    }
+
+    /**
+     * เช็คว่าเป็นเลขเบิ้ล (ตัวเลขซ้ำกันทั้งหมด เช่น 111111, 222222)
+     */
+    isAllSameDigits(number) {
+        return /^(\d)\1{5}$/.test(number);
+    }
+
+    /**
+     * เช็คว่าเป็นเลขเบิ้ลคู่ (เช่น 112233, 445566, 001122)
+     */
+    isDoublePattern(number) {
+        // เช็ค pattern AA BB CC
+        if (/^(\d)\1(\d)\2(\d)\3$/.test(number)) return true;
+        // เช็ค pattern AAA BBB
+        if (/^(\d)\1\1(\d)\2\2$/.test(number)) return true;
+        // เช็ค pattern AABB CC หรือ AA BBCC
+        if (/^(\d)\1(\d)\2(\d)\3$/.test(number)) return true;
+        return false;
+    }
+
+    /**
+     * เช็คว่าเป็นเลขเรียงสวย (เช่น 123456, 654321, 012345)
+     */
+    isSequentialNumber(number) {
+        const digits = number.split('').map(Number);
+
+        // เช็คเลขเรียงขึ้น (0,1,2,3,4,5 หรือ 1,2,3,4,5,6 ฯลฯ)
+        let isAscending = true;
+        for (let i = 1; i < digits.length; i++) {
+            if (digits[i] !== (digits[i - 1] + 1) % 10) {
+                isAscending = false;
+                break;
+            }
+        }
+
+        // เช็คเลขเรียงลง (9,8,7,6,5,4 หรือ 6,5,4,3,2,1 ฯลฯ)
+        let isDescending = true;
+        for (let i = 1; i < digits.length; i++) {
+            if (digits[i] !== (digits[i - 1] - 1 + 10) % 10) {
+                isDescending = false;
+                break;
+            }
+        }
+
+        return isAscending || isDescending;
+    }
+
+    /**
+     * เช็คว่าเป็นเลข pattern พิเศษ (เช่น 121212, 131313, 252525)
+     */
+    isRepeatingPattern(number) {
+        // Pattern AB AB AB
+        if (/^(\d\d)\1\1$/.test(number)) return true;
+        // Pattern ABC ABC
+        if (/^(\d{3})\1$/.test(number)) return true;
+        // Pattern A B A B A B
+        if (/^(\d)(\d)\1\2\1\2$/.test(number)) return true;
+        return false;
+    }
+
+    /**
+     * เช็คว่าเป็นเลขคู่เรียง (เช่น 024680, 246802, 468024)
+     */
+    isEvenSequence(number) {
+        const evenDigits = ['0', '2', '4', '6', '8'];
+        const digits = number.split('');
+
+        // เช็คว่าทุกตัวเป็นเลขคู่
+        const allEven = digits.every(d => evenDigits.includes(d));
+        if (!allEven) return false;
+
+        // เช็คว่าเป็น pattern เรียง (0,2,4,6,8,0 หรือ 2,4,6,8,0,2 ฯลฯ)
+        for (let i = 1; i < digits.length; i++) {
+            const prev = parseInt(digits[i - 1]);
+            const curr = parseInt(digits[i]);
+            // เลขคู่ถัดไปคือ +2 หรือ wrap (8 -> 0)
+            if (curr !== (prev + 2) % 10) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * เช็คว่าเป็นเลขคี่เรียง (เช่น 135791, 357913, 579135)
+     */
+    isOddSequence(number) {
+        const oddDigits = ['1', '3', '5', '7', '9'];
+        const digits = number.split('');
+
+        // เช็คว่าทุกตัวเป็นเลขคี่
+        const allOdd = digits.every(d => oddDigits.includes(d));
+        if (!allOdd) return false;
+
+        // เช็คว่าเป็น pattern เรียง (1,3,5,7,9,1 หรือ 3,5,7,9,1,3 ฯลฯ)
+        for (let i = 1; i < digits.length; i++) {
+            const prev = parseInt(digits[i - 1]);
+            const curr = parseInt(digits[i]);
+            // เลขคี่ถัดไปคือ +2 หรือ wrap (9 -> 1)
+            const expected = prev === 9 ? 1 : prev + 2;
+            if (curr !== expected) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * เช็คว่าเป็นเลขหาร 3 ลงตัว (สูตรคูณแม่ 3)
+     */
+    isDivisibleByThree(number) {
+        const num = parseInt(number, 10);
+        return num % 3 === 0;
+    }
+
+    /**
+     * เช็คว่าเลขนี้เป็นเลขที่ออกยาก (ควรหลีกเลี่ยง)
+     */
+    isHardToWinNumber(number) {
+        return this.isLowNumber(number) ||
+            this.isAllSameDigits(number) ||
+            this.isDoublePattern(number) ||
+            this.isSequentialNumber(number) ||
+            this.isRepeatingPattern(number) ||
+            this.isEvenSequence(number) ||
+            this.isOddSequence(number) ||
+            this.isDivisibleByThree(number);
+    }
+
+    /**
+     * สุ่มเลขที่ไม่เคยออกรางวัลมาก่อน และไม่ใช่เลขที่ออกยาก
+     * ถ้าซ้ำหรือเป็นเลขยากจะสุ่มใหม่จนกว่าจะได้เลขที่ดี
      */
     generateUniqueNumber() {
         let attempts = 0;
         let number;
+        let skippedHardNumbers = 0;
 
         do {
             number = this.generateRandomNumber();
             attempts++;
+
+            // นับเลขที่ถูก skip เพราะเป็นเลขยาก
+            if (this.isHardToWinNumber(number)) {
+                skippedHardNumbers++;
+            }
 
             // ป้องกัน infinite loop (ถ้าเลือก > 1 ล้านครั้ง)
             if (attempts > 1000000) {
                 console.warn('Too many attempts, returning last number');
                 break;
             }
-        } while (this.isNumberExists(number));
+        } while (this.isNumberExists(number) || this.isHardToWinNumber(number));
 
-        console.log(`สุ่มได้เลข ${number} หลังจากลอง ${attempts} ครั้ง`);
-        return { number, attempts };
+        console.log(`สุ่มได้เลข ${number} หลังจากลอง ${attempts} ครั้ง (ข้ามเลขยาก ${skippedHardNumbers} เลข)`);
+        return { number, attempts, skippedHardNumbers };
     }
 
     setupEventListeners() {
