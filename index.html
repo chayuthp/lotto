@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>สุ่มเลขลอตเตอรี่ไทย | Thai Lottery Random</title>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Animated Background -->
+    <div class="bg-animation">
+        <div class="stars"></div>
+        <div class="stars2"></div>
+        <div class="stars3"></div>
+    </div>
+
+    <!-- Floating Particles -->
+    <div class="particles" id="particles"></div>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <div class="logo-icon">🎰</div>
+                <h1>สุ่มเลขลอตเตอรี่</h1>
+            </div>
+            <p class="subtitle">สุ่มเลข 6 ตัวที่ไม่เคยออกรางวัลมาก่อน</p>
+        </header>
+
+        <!-- Stats Panel -->
+        <div class="stats-panel" id="statsPanel">
+            <div class="stat-item">
+                <span class="stat-value" id="totalNumbers">0</span>
+                <span class="stat-label">เลขที่เคยออกรางวัล</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-value" id="totalDraws">0</span>
+                <span class="stat-label">งวดที่ดึงข้อมูล</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-value" id="remainingNumbers">0</span>
+                <span class="stat-label">เลขที่ยังไม่เคยออก</span>
+            </div>
+        </div>
+
+        <!-- Info Panel -->
+        <div class="info-panel">
+            <div class="info-icon">💡</div>
+            <div class="info-content">
+                <h3>วิธีการทำงาน</h3>
+                <p>ระบบจะสุ่มเลข 6 ตัว (000000-999999) แล้วเช็คกับข้อมูลรางวัลทั้งหมด ถ้าเลขที่สุ่มเคยออกรางวัลมาก่อน จะสุ่มใหม่จนกว่าจะได้เลขที่ไม่เคยออกรางวัล</p>
+            </div>
+        </div>
+
+        <!-- Random Result Display -->
+        <div class="result-section">
+            <h2 class="section-title">
+                <span class="icon">✨</span>
+                ผลการสุ่ม
+            </h2>
+            <div class="result-display" id="resultDisplay">
+                <div class="number-slots">
+                    <span class="slot">-</span>
+                    <span class="slot">-</span>
+                    <span class="slot">-</span>
+                    <span class="slot">-</span>
+                    <span class="slot">-</span>
+                    <span class="slot">-</span>
+                </div>
+                <div class="result-info" id="resultInfo">
+                    <span class="result-date"></span>
+                    <span class="result-prize"></span>
+                </div>
+            </div>
+
+            <!-- Random Button -->
+            <button class="random-btn" id="randomBtn">
+                <span class="btn-icon">🎲</span>
+                <span class="btn-text">สุ่มเลข</span>
+                <div class="btn-glow"></div>
+            </button>
+
+            <!-- Reset Button -->
+            <button class="reset-btn" id="resetBtn">
+                <span>🔄</span> รีเซ็ตหน้าจอ
+            </button>
+        </div>
+
+        <!-- History Section -->
+        <div class="history-section">
+            <h2 class="section-title">
+                <span class="icon">📜</span>
+                ประวัติการสุ่ม
+                <span class="history-count" id="historyCount">0</span>
+            </h2>
+            <div class="history-list" id="historyList">
+                <p class="history-empty">ยังไม่มีประวัติการสุ่ม</p>
+            </div>
+            <button class="clear-history-btn" id="clearHistoryBtn">
+                <span>🗑️</span> ล้างประวัติ
+            </button>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast">
+        <span class="toast-icon">✅</span>
+        <span class="toast-message" id="toastMessage">สำเร็จ!</span>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,57 @@
+# GitHub Actions Workflow - อัพเดทข้อมูลหวยไทยอัตโนมัติ
+# รันทุกวันที่ 1 และ 16 ของเดือน เวลา 14:30 น. (หลังหวยออก)
+
+name: Update Lotto Data
+
+on:
+  # รันตามเวลาที่กำหนด (cron schedule)
+  schedule:
+    # รันเวลา 07:30 UTC = 14:30 น. ตามเวลาไทย (GMT+7)
+    # วันที่ 1 ของทุกเดือน
+    - cron: '30 7 1 * *'
+    # วันที่ 16 ของทุกเดือน
+    - cron: '30 7 16 * *'
+  
+  # สามารถรันด้วยมือได้จากหน้า Actions
+  workflow_dispatch:
+
+jobs:
+  update-lotto:
+    runs-on: ubuntu-latest
+    
+    permissions:
+      contents: write
+    
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      
+      - name: 🟢 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      
+      - name: 🎰 Run lotto update script
+        run: node fetch_lotto_update.js
+      
+      - name: 📝 Check for changes
+        id: check_changes
+        run: |
+          if git diff --quiet example2.json; then
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+            echo "📭 No new data found"
+          else
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+            echo "📬 New data found!"
+          fi
+      
+      - name: 💾 Commit and push changes
+        if: steps.check_changes.outputs.has_changes == 'true'
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add example2.json
+          git commit -m "🎰 อัพเดทข้อมูลหวยงวดใหม่ - $(date +'%d/%m/%Y')"
+          git push
