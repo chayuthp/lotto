@@ -26,6 +26,9 @@ const PRIZE_IDS = [
 // ปีสิ้นสุด (ปี พ.ศ. ที่ต้องการย้อนหลังไปถึง)
 const END_YEAR_BE = 2550;
 
+// จำนวนวันที่ค้นหาสูงสุด (ถ้าวันที่ 1/16 ไม่พบ จะลองหา 2/17, 3/18, ... จนถึง 15 วัน)
+const MAX_SEARCH_DAYS = 15;
+
 // สร้าง delay function เพื่อไม่ให้ request ถี่เกินไป
 function delay(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
@@ -70,14 +73,16 @@ function formatDate(day, month, year) {
     return `${dayStr}${monthStr}${yearStr}`;
 }
 
-// สร้างรายการวันที่ทั้งหมดที่ต้องดึง (dynamic)
-function generateDateList() {
-    const dates = [];
+// สร้างรายการงวดหวยทั้งหมดที่ต้องดึง (dynamic)
+// return รายการ periods แทน date codes เพื่อรองรับ fallback logic
+function generateLottoPeriods() {
+    const periods = [];
     const current = getCurrentLottoDate();
 
     console.log(`📅 วันที่ปัจจุบัน: ${new Date().toLocaleDateString('th-TH')}`);
     console.log(`🎯 งวดล่าสุด: ${current.day}/${current.month}/${current.year}`);
     console.log(`📆 ย้อนหลังถึงปี: พ.ศ. ${END_YEAR_BE}`);
+    console.log(`🔍 จะค้นหาสูงสุด ${MAX_SEARCH_DAYS} วันต่องวด ถ้าไม่พบวันออกหวยปกติ`);
     console.log('');
 
     // เริ่มจากงวดปัจจุบันย้อนหลังไป
@@ -87,28 +92,28 @@ function generateDateList() {
         const endMonth = 1;
 
         for (let month = startMonth; month >= endMonth; month--) {
-            // กำหนดวันที่ต้องดึง
-            const daysToFetch = [];
+            // กำหนดวันที่ต้องดึง (baseDay)
+            const baseDays = [];
 
             if (year === current.year && month === current.month) {
                 // เดือนปัจจุบัน - ดึงเฉพาะวันที่ผ่านมาแล้ว
                 if (current.day >= 16) {
-                    daysToFetch.push(16, 1);
+                    baseDays.push(16, 1);
                 } else if (current.day >= 1) {
-                    daysToFetch.push(1);
+                    baseDays.push(1);
                 }
             } else {
                 // เดือนอื่นๆ - ดึงทั้งวันที่ 16 และ 1
-                daysToFetch.push(16, 1);
+                baseDays.push(16, 1);
             }
 
-            for (const day of daysToFetch) {
-                dates.push(formatDate(day, month, year));
+            for (const baseDay of baseDays) {
+                periods.push({ baseDay, month, year });
             }
         }
     }
 
-    return dates;
+    return periods;
 }
 
 // ดึงข้อมูลจาก API ด้วย https module
@@ -133,6 +138,47 @@ function fetchLottoData(dateCode) {
             });
         }).on('error', () => resolve(null));
     });
+}
+
+// ดึงข้อมูลหวยพร้อม fallback ถ้าไม่พบวันที่ 1/16 จะลองหาวันถัดไป
+async function fetchLottoWithFallback(baseDay, month, year) {
+    // ลองหาตั้งแต่วันที่ base (1 หรือ 16) ไปจนถึง base + MAX_SEARCH_DAYS
+    for (let offset = 0; offset < MAX_SEARCH_DAYS; offset++) {
+        const tryDay = baseDay + offset;
+
+        // ตรวจสอบว่าวันที่ถูกต้อง (ไม่เกินจำนวนวันในเดือน)
+        const daysInMonth = getDaysInMonth(month, year);
+        if (tryDay > daysInMonth) break;
+
+        const dateCode = formatDate(tryDay, month, year);
+        const response = await fetchLottoData(dateCode);
+
+        if (response) {
+            const extracted = extractPrizes(response);
+            const hasPrizes = Object.keys(extracted.prizes).length > 0;
+            const hasValidDate = response.date && response.date.trim() !== '';
+
+            // ต้องมีทั้ง prizes และ date ที่ถูกต้องถึงจะถือว่าพบข้อมูล
+            if (hasPrizes && hasValidDate) {
+                return {
+                    success: true,
+                    data: extracted,
+                    actualDate: response.date,
+                    triedDays: offset + 1
+                };
+            }
+        }
+
+        await delay(200);
+    }
+
+    return { success: false, triedDays: MAX_SEARCH_DAYS };
+}
+
+// หาจำนวนวันในเดือน
+function getDaysInMonth(month, yearBE) {
+    const yearCE = yearBE - 543;
+    return new Date(yearCE, month, 0).getDate();
 }
 
 // ดึงข้อมูลรางวัลที่ต้องการ
@@ -195,46 +241,48 @@ function organizeByPrizeType(allData) {
 
 // ฟังก์ชันหลัก
 async function main() {
-    console.log('🎰 สคริปต์ดึงข้อมูลหวยไทย (Dynamic Date)');
+    console.log('🎰 สคริปต์ดึงข้อมูลหวยไทย (Dynamic Date with Fallback)');
     console.log('='.repeat(50));
     console.log('');
 
-    const dates = generateDateList();
-    console.log(`📊 จำนวนงวดที่ต้องดึง: ${dates.length} งวด`);
+    const periods = generateLottoPeriods();
+    console.log(`📊 จำนวนงวดที่ต้องดึง: ${periods.length} งวด`);
     console.log('');
 
     const allData = [];
     let successCount = 0;
     let failCount = 0;
+    let fallbackCount = 0; // นับจำนวนครั้งที่ต้องใช้ fallback
 
-    for (let i = 0; i < dates.length; i++) {
-        const dateCode = dates[i];
-        process.stdout.write(`\r🔄 กำลังดึงข้อมูล: ${i + 1}/${dates.length} (${dateCode})`);
+    for (let i = 0; i < periods.length; i++) {
+        const { baseDay, month, year } = periods[i];
+        const baseDateStr = formatDate(baseDay, month, year);
+        process.stdout.write(`\r🔄 กำลังดึงข้อมูล: ${i + 1}/${periods.length} (${baseDateStr})`);
 
-        const response = await fetchLottoData(dateCode);
+        const result = await fetchLottoWithFallback(baseDay, month, year);
 
-        if (response) {
-            const extracted = extractPrizes(response);
-            const hasPrizes = Object.keys(extracted.prizes).length > 0;
+        if (result.success) {
+            allData.push(result.data);
+            successCount++;
 
-            if (hasPrizes) {
-                allData.push(extracted);
-                successCount++;
-                console.log(` ✅ ${response.date}`);
+            // แสดงข้อมูลว่าพบวันที่ไหน
+            if (result.triedDays > 1) {
+                console.log(` ✅ ${result.actualDate} (เลื่อน +${result.triedDays - 1} วัน)`);
+                fallbackCount++;
             } else {
-                failCount++;
+                console.log(` ✅ ${result.actualDate}`);
             }
         } else {
             failCount++;
+            console.log(` ⚠️ ไม่พบข้อมูล (ลองแล้ว ${result.triedDays} วัน)`);
         }
-
-        await delay(300);
     }
 
     console.log('\n');
     console.log('='.repeat(50));
     console.log('📈 สรุปผล:');
     console.log(`   ✅ ดึงข้อมูลสำเร็จ: ${successCount} งวด`);
+    console.log(`   🔄 ใช้ fallback (เลื่อนวัน): ${fallbackCount} งวด`);
     console.log(`   ⚠️ ไม่พบข้อมูล: ${failCount} งวด`);
     console.log('');
 

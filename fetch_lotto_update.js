@@ -22,6 +22,9 @@ const PRIZE_IDS = [
     'prizeFifth'
 ];
 
+// จำนวนวันที่ค้นหาสูงสุด (ถ้าวันที่ 1/16 ไม่พบ จะลองหา 2/17, 3/18, ... จนถึง 31 วัน)
+const MAX_SEARCH_DAYS = 31;
+
 // สร้าง delay function
 function delay(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
@@ -41,22 +44,23 @@ function formatDate(day, month, year) {
 }
 
 // หางวดหวยที่ควรมีข้อมูล (งวดปัจจุบันหรืองวดที่ผ่านมา)
-function getLatestLottoDates() {
+// return รายการ periods เพื่อรองรับ fallback logic
+function getLatestLottoPeriods() {
     const now = new Date();
     const currentDay = now.getDate();
     const currentMonth = now.getMonth() + 1;
     const currentYearBE = toBuddhistYear(now.getFullYear());
 
-    const dates = [];
+    const periods = [];
 
     // งวดปัจจุบันของเดือนนี้
     if (currentDay >= 16) {
         // ถ้าวันที่ >= 16 เช็คทั้งงวดวันที่ 16 และ 1
-        dates.push(formatDate(16, currentMonth, currentYearBE));
-        dates.push(formatDate(1, currentMonth, currentYearBE));
+        periods.push({ baseDay: 16, month: currentMonth, year: currentYearBE });
+        periods.push({ baseDay: 1, month: currentMonth, year: currentYearBE });
     } else if (currentDay >= 1) {
         // ถ้าวันที่ >= 1 แต่ < 16 เช็คงวดวันที่ 1
-        dates.push(formatDate(1, currentMonth, currentYearBE));
+        periods.push({ baseDay: 1, month: currentMonth, year: currentYearBE });
     }
 
     // เพิ่มงวดเดือนก่อนหน้าด้วย (กันพลาด)
@@ -66,10 +70,10 @@ function getLatestLottoDates() {
         prevMonth = 12;
         prevYear--;
     }
-    dates.push(formatDate(16, prevMonth, prevYear));
-    dates.push(formatDate(1, prevMonth, prevYear));
+    periods.push({ baseDay: 16, month: prevMonth, year: prevYear });
+    periods.push({ baseDay: 1, month: prevMonth, year: prevYear });
 
-    return dates;
+    return periods;
 }
 
 // อ่านข้อมูลเดิมจากไฟล์
@@ -130,6 +134,47 @@ function fetchLottoData(dateCode) {
     });
 }
 
+// หาจำนวนวันในเดือน
+function getDaysInMonth(month, yearBE) {
+    const yearCE = yearBE - 543;
+    return new Date(yearCE, month, 0).getDate();
+}
+
+// ดึงข้อมูลหวยพร้อม fallback ถ้าไม่พบวันที่ 1/16 จะลองหาวันถัดไป
+async function fetchLottoWithFallback(baseDay, month, year) {
+    // ลองหาตั้งแต่วันที่ base (1 หรือ 16) ไปจนถึง base + MAX_SEARCH_DAYS
+    for (let offset = 0; offset < MAX_SEARCH_DAYS; offset++) {
+        const tryDay = baseDay + offset;
+
+        // ตรวจสอบว่าวันที่ถูกต้อง (ไม่เกินจำนวนวันในเดือน)
+        const daysInMonth = getDaysInMonth(month, year);
+        if (tryDay > daysInMonth) break;
+
+        const dateCode = formatDate(tryDay, month, year);
+        const response = await fetchLottoData(dateCode);
+
+        if (response) {
+            const extracted = extractPrizes(response);
+            const hasPrizes = Object.keys(extracted.prizes).length > 0;
+            const hasValidDate = response.date && response.date.trim() !== '';
+
+            // ต้องมีทั้ง prizes และ date ที่ถูกต้องถึงจะถือว่าพบข้อมูล
+            if (hasPrizes && hasValidDate) {
+                return {
+                    success: true,
+                    data: extracted,
+                    actualDate: response.date,
+                    triedDays: offset + 1
+                };
+            }
+        }
+
+        await delay(200);
+    }
+
+    return { success: false, triedDays: MAX_SEARCH_DAYS };
+}
+
 // ดึงข้อมูลรางวัล
 function extractPrizes(response) {
     const extracted = {
@@ -183,9 +228,10 @@ function addNewDraw(existingData, newDraw) {
 
 // ฟังก์ชันหลัก
 async function main() {
-    console.log('🎰 สคริปต์อัพเดทข้อมูลหวยไทย (Incremental)');
+    console.log('🎰 สคริปต์อัพเดทข้อมูลหวยไทย (Incremental with Fallback)');
     console.log('='.repeat(50));
     console.log(`📅 วันที่รัน: ${new Date().toLocaleString('th-TH')}`);
+    console.log(`🔍 จะค้นหาสูงสุด ${MAX_SEARCH_DAYS} วันต่องวด ถ้าไม่พบวันออกหวยปกติ`);
     console.log('');
 
     // โหลดข้อมูลเดิม
@@ -193,45 +239,45 @@ async function main() {
     console.log(`📊 ข้อมูลเดิม: ${existingData.metadata.totalDraws} งวด`);
 
     // หางวดที่ควรเช็ค
-    const datesToCheck = getLatestLottoDates();
-    console.log(`🔍 เช็คงวด: ${datesToCheck.join(', ')}`);
+    const periodsToCheck = getLatestLottoPeriods();
+    const periodsDisplay = periodsToCheck.map(p => `${p.baseDay}/${p.month}/${p.year}`).join(', ');
+    console.log(`🔍 เช็คงวด: ${periodsDisplay}`);
     console.log('');
 
     let newDrawsCount = 0;
+    let fallbackCount = 0;
 
-    for (const dateCode of datesToCheck) {
-        // แปลง dateCode เป็นรูปแบบวันที่อ่านง่าย
-        const day = dateCode.substring(0, 2);
-        const month = dateCode.substring(2, 4);
-        const year = dateCode.substring(4);
-        const readableDate = `${day}/${month}/${year}`;
+    for (const period of periodsToCheck) {
+        const { baseDay, month, year } = period;
+        const baseDateStr = `${baseDay.toString().padStart(2, '0')}/${month.toString().padStart(2, '0')}/${year}`;
 
-        // เช็คว่ามีข้อมูลแล้วหรือยัง
-        if (isDateExists(existingData, readableDate)) {
-            console.log(`⏭️ งวด ${readableDate} - มีข้อมูลแล้ว`);
-            continue;
-        }
+        console.log(`🔄 กำลังดึงข้อมูลงวด ${baseDateStr}...`);
 
-        console.log(`🔄 กำลังดึงข้อมูลงวด ${readableDate}...`);
+        const result = await fetchLottoWithFallback(baseDay, month, year);
 
-        const response = await fetchLottoData(dateCode);
+        if (result.success) {
+            // เช็คว่ามีข้อมูลแล้วหรือยัง (ใช้ actualDate ที่ได้)
+            if (isDateExists(existingData, result.actualDate)) {
+                if (result.triedDays > 1) {
+                    console.log(`   ⏭️ ${result.actualDate} - มีข้อมูลแล้ว (เลื่อน +${result.triedDays - 1} วัน)`);
+                } else {
+                    console.log(`   ⏭️ ${result.actualDate} - มีข้อมูลแล้ว`);
+                }
+                continue;
+            }
 
-        if (response) {
-            const extracted = extractPrizes(response);
-            const hasPrizes = Object.keys(extracted.prizes).length > 0;
+            existingData = addNewDraw(existingData, result.data);
+            newDrawsCount++;
 
-            if (hasPrizes) {
-                existingData = addNewDraw(existingData, extracted);
-                newDrawsCount++;
-                console.log(`✅ เพิ่มข้อมูลงวด ${extracted.date} สำเร็จ!`);
+            if (result.triedDays > 1) {
+                console.log(`   ✅ เพิ่มข้อมูลงวด ${result.actualDate} สำเร็จ! (เลื่อน +${result.triedDays - 1} วัน)`);
+                fallbackCount++;
             } else {
-                console.log(`⚠️ งวด ${readableDate} - ไม่พบข้อมูลรางวัล`);
+                console.log(`   ✅ เพิ่มข้อมูลงวด ${result.actualDate} สำเร็จ!`);
             }
         } else {
-            console.log(`⚠️ งวด ${readableDate} - ยังไม่มีข้อมูล (อาจยังไม่ออก)`);
+            console.log(`   ⚠️ งวด ${baseDateStr} - ไม่พบข้อมูล (ลองแล้ว ${result.triedDays} วัน)`);
         }
-
-        await delay(500);
     }
 
     console.log('');
