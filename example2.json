@@ -1,16 +1,22 @@
 {
     "metadata": {
-        "generatedAt": "2026-02-16T08:03:37.646Z",
-        "totalDraws": 436,
+        "generatedAt": "2026-03-01T07:50:41.220Z",
+        "totalDraws": 437,
         "dateRange": {
             "from": "16 มกราคม 2550",
-            "to": "16 กุมภาพันธ์ 2569"
+            "to": "1 มีนาคม 2569"
         }
     },
     "prizeFirst": {
         "name": "รางวัลที่ 1",
         "reward": "6000000",
         "draws": [
+            {
+                "date": "1 มีนาคม 2569",
+                "numbers": [
+                    "xxxxxx"
+                ]
+            },
             {
                 "date": "16 กุมภาพันธ์ 2569",
                 "numbers": [
@@ -2633,6 +2639,13 @@
         "name": "รางวัลข้างเคียงรางวัลที่ 1",
         "reward": "100000",
         "draws": [
+            {
+                "date": "1 มีนาคม 2569",
+                "numbers": [
+                    "xxxxxx",
+                    "xxxxxx"
+                ]
+            },
             {
                 "date": "16 กุมภาพันธ์ 2569",
                 "numbers": [
@@ -5691,6 +5704,16 @@
         "name": "รางวัลที่ 2",
         "reward": "200000",
         "draws": [
+            {
+                "date": "1 มีนาคม 2569",
+                "numbers": [
+                    "328032",
+                    "716735",
+                    "320227",
+                    "373865",
+                    "731233"
+                ]
+            },
             {
                 "date": "16 กุมภาพันธ์ 2569",
                 "numbers": [
@@ -10057,6 +10080,21 @@
         "name": "รางวัลที่ 3",
         "reward": "80000",
         "draws": [
+            {
+                "date": "1 มีนาคม 2569",
+                "numbers": [
+                    "848897",
+                    "255067",
+                    "135646",
+                    "194429",
+                    "262799",
+                    "085123",
+                    "148874",
+                    "020061",
+                    "680266",
+                    "140134"
+                ]
+            },
             {
                 "date": "16 กุมภาพันธ์ 2569",
                 "numbers": [
@@ -16603,6 +16641,61 @@
         "name": "รางวัลที่ 4",
         "reward": "40000",
         "draws": [
+            {
+                "date": "1 มีนาคม 2569",
+                "numbers": [
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx"
+                ]
+            },
             {
                 "date": "16 กุมภาพันธ์ 2569",
                 "numbers": [
@@ -40589,6 +40682,111 @@
         "name": "รางวัลที่ 5",
         "reward": "20000",
         "draws": [
+            {
+                "date": "1 มีนาคม 2569",
+                "numbers": [
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx",
+                    "xxxxxx"
+                ]
+            },
             {
                 "date": "16 กุมภาพันธ์ 2569",
                 "numbers": [
